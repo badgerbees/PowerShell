@@ -4103,13 +4103,13 @@ namespace System.Management.Automation.Runspaces
             var note = member as PSNoteProperty;
             if (note != null)
             {
-                return new NotePropertyData(note.Name, note.Value);
+                return new NotePropertyData(note.Name, note.Value) { IsHidden = note.IsHidden };
             }
 
             var alias = member as PSAliasProperty;
             if (alias != null)
             {
-                return new AliasPropertyData(alias.Name, alias.ReferencedMemberName);
+                return new AliasPropertyData(alias.Name, alias.ReferencedMemberName) { IsHidden = alias.IsHidden };
             }
 
             var scriptProperty = member as PSScriptProperty;
@@ -4117,7 +4117,7 @@ namespace System.Management.Automation.Runspaces
             {
                 ScriptBlock getter = scriptProperty.IsGettable ? scriptProperty.GetterScript : null;
                 ScriptBlock setter = scriptProperty.IsSettable ? scriptProperty.SetterScript : null;
-                return new ScriptPropertyData(scriptProperty.Name, getter, setter);
+                return new ScriptPropertyData(scriptProperty.Name, getter, setter) { IsHidden = scriptProperty.IsHidden };
             }
 
             var codeProperty = member as PSCodeProperty;
@@ -4125,7 +4125,7 @@ namespace System.Management.Automation.Runspaces
             {
                 MethodInfo getter = codeProperty.IsGettable ? codeProperty.GetterCodeReference : null;
                 MethodInfo setter = codeProperty.IsSettable ? codeProperty.SetterCodeReference : null;
-                return new CodePropertyData(codeProperty.Name, getter, setter);
+                return new CodePropertyData(codeProperty.Name, getter, setter) { IsHidden = codeProperty.IsHidden };
             }
 
             var scriptMethod = member as PSScriptMethod;
@@ -4154,7 +4154,7 @@ namespace System.Management.Automation.Runspaces
                     membersData.Add(GetTypeMemberDataFromPSMemberInfo(m));
                 }
 
-                return new MemberSetData(memberSet.Name, membersData);
+                return new MemberSetData(memberSet.Name, membersData) { IsHidden = memberSet.IsHidden };
             }
 
             return null;
