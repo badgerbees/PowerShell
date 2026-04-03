@@ -4151,10 +4151,18 @@ namespace System.Management.Automation.Runspaces
                 var membersData = new Collection<TypeMemberData>();
                 foreach (var m in memberSet.Members)
                 {
-                    membersData.Add(GetTypeMemberDataFromPSMemberInfo(m));
+                    TypeMemberData memberData = GetTypeMemberDataFromPSMemberInfo(m);
+                    if (memberData != null)
+                    {
+                        membersData.Add(memberData);
+                    }
                 }
 
-                return new MemberSetData(memberSet.Name, membersData) { IsHidden = memberSet.IsHidden };
+                return new MemberSetData(memberSet.Name, membersData)
+                {
+                    IsHidden = memberSet.IsHidden,
+                    InheritMembers = memberSet.InheritMembers
+                };
             }
 
             return null;
