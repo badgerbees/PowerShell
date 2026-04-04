@@ -4125,7 +4125,7 @@ namespace System.Management.Automation.Runspaces
             {
                 MethodInfo getter = codeProperty.IsGettable ? codeProperty.GetterCodeReference : null;
                 MethodInfo setter = codeProperty.IsSettable ? codeProperty.SetterCodeReference : null;
-                return new CodePropertyData(codeProperty.Name, getter, setter) { IsHidden = codeProperty.IsHidden };
+                return new CodePropertyData(codeProperty.Name, getter, setter);
             }
 
             var scriptMethod = member as PSScriptMethod;
