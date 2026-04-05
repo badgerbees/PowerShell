@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Management.Automation;
 using System.Management.Automation.Internal;
 using System.Threading;
@@ -174,6 +175,36 @@ namespace PSTests.Parallel
         public static void TestNonEmptyErrorRecordToString()
         {
             Assert.Equal("test", new ErrorRecord(new Exception("test"), null, ErrorCategory.NotSpecified, null).ToString());
+        }
+
+        [Fact]
+        public static void TestFriendlyContentLengthFormatting()
+        {
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                Assert.Equal("unknown size", GetFriendlyContentLength(null));
+                Assert.Equal("0 Bytes (0 bytes)", GetFriendlyContentLength(0));
+                Assert.Equal("1.0 KB (1,024 bytes)", GetFriendlyContentLength(1024));
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        private static string GetFriendlyContentLength(long? length)
+        {
+            Type contentHelperType = typeof(InvokeWebRequestCommand).Assembly.GetType("Microsoft.PowerShell.Commands.ContentHelper", throwOnError: true)!;
+            MethodInfo getFriendlyContentLength = contentHelperType.GetMethod("GetFriendlyContentLength", BindingFlags.Static | BindingFlags.NonPublic)!;
+
+            return (string)getFriendlyContentLength.Invoke(null, new object?[] { length })!;
         }
     }
 }

@@ -9,7 +9,6 @@ using System.Management.Automation;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using Humanizer;
 using Microsoft.Win32;
 
 namespace Microsoft.PowerShell.Commands
@@ -27,7 +26,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal static string GetFriendlyContentLength(long? length) =>
             length.HasValue
-            ? $"{length.Value.Bytes().Humanize()} ({length.Value:#,0} bytes)"
+            ? $"{Utils.DisplayHumanReadableFileSize(length.Value)} ({length.Value:#,0} bytes)"
             : "unknown size";
 
         internal static StringBuilder GetRawContentHeader(HttpResponseMessage response)
