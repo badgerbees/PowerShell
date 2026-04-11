@@ -92,30 +92,13 @@ namespace Microsoft.PowerShell.Telemetry
     }
 
     /// <summary>
-    /// Set up the telemetry initializer to mask the platform specific names.
-    /// </summary>
-    internal class NameObscurerTelemetryInitializer : ITelemetryInitializer
-    {
-        // Report the platform name information as "na".
-        private const string _notavailable = "na";
-
-        /// <summary>
-        /// Initialize properties we are obscuring to "na".
-        /// </summary>
-        /// <param name="telemetry">The instance of our telemetry.</param>
-        public void Initialize(ITelemetry telemetry)
-        {
-            telemetry.Context.Cloud.RoleName = _notavailable;
-            telemetry.Context.GetInternalContext().NodeName = _notavailable;
-            telemetry.Context.Cloud.RoleInstance = _notavailable;
-        }
-    }
-
-    /// <summary>
     /// Send up telemetry for startup.
     /// </summary>
     public static class ApplicationInsightsTelemetry
     {
+        // Report the platform name information as "na".
+        private const string _notavailable = "na";
+
         // The string for SubsystermRegistration
         internal const string s_subsystemRegistration = "Subsystem.Registration";
 
@@ -187,16 +170,20 @@ namespace Microsoft.PowerShell.Telemetry
             }
 
             s_sessionId = Guid.NewGuid().ToString();
-            TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
-            configuration.ConnectionString = "InstrumentationKey=" + _psCoreTelemetryKey;
+            try
+            {
+                TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
+                configuration.ConnectionString = "InstrumentationKey=" + _psCoreTelemetryKey;
 
-            // Set this to true to reduce latency during development
-            configuration.TelemetryChannel.DeveloperMode = false;
-
-            // Be sure to obscure any information about the client node name.
-            configuration.TelemetryInitializers.Add(new NameObscurerTelemetryInitializer());
-
-            s_telemetryClient = new TelemetryClient(configuration);
+                s_telemetryClient = new TelemetryClient(configuration);
+                s_telemetryClient.Context.Cloud.RoleName = _notavailable;
+                s_telemetryClient.Context.Cloud.RoleInstance = _notavailable;
+            }
+            catch
+            {
+                CanSendTelemetry = false;
+                return;
+            }
 
             // use a hashset when looking for module names, it should be quicker than a string comparison
             s_knownModules = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
