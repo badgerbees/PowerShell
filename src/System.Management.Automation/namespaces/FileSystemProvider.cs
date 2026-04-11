@@ -2443,6 +2443,13 @@ namespace Microsoft.PowerShell.Commands
 
                 if (ShouldProcess(resource, action))
                 {
+                    if (!IsJunctionSupported(path))
+                    {
+                        string message = FileSystemProviderStrings.JunctionNotSupported;
+                        WriteError(new ErrorRecord(new InvalidOperationException(message), "NewItemInvalidOperation", ErrorCategory.InvalidOperation, path));
+                        return;
+                    }
+
                     bool isDirectory = false;
                     string strTargetPath = value?.ToString();
 
@@ -2606,6 +2613,33 @@ namespace Microsoft.PowerShell.Commands
         {
             bool junctionCreated = InternalSymbolicLinkLinkCodeMethods.CreateJunction(path, strTargetPath);
             return junctionCreated;
+        }
+
+        private static bool IsJunctionSupported(string path)
+        {
+            try
+            {
+                string pathRoot = Path.GetPathRoot(path);
+
+                if (string.IsNullOrEmpty(pathRoot))
+                {
+                    return false;
+                }
+
+                return string.Equals(new DriveInfo(pathRoot).DriveFormat, "NTFS", StringComparison.OrdinalIgnoreCase);
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
 
         private enum ItemType

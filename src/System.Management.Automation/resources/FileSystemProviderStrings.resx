@@ -297,6 +297,9 @@
   <data name="SymbolicLinkNotSupported" xml:space="preserve">
     <value>Symbolic links are not supported for the specified path.</value>
   </data>
+  <data name="JunctionNotSupported" xml:space="preserve">
+    <value>Junctions are supported only on NTFS file systems.</value>
+  </data>
   <data name="CopyItemRemotelyProgressActivity" xml:space="preserve">
     <value>Copying {0} to {1}</value>
   </data>

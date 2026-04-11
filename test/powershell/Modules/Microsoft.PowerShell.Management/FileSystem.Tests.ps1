@@ -703,6 +703,11 @@ Describe "Hard link and symbolic link tests" -Tags "CI", "RequireAdminOnWindows"
             Test-Path $junctionToDir | Should -BeTrue
         }
 
+        It "New-Item rejects junctions on non-NTFS file systems" -Skip:([System.IO.DriveInfo]::new([System.IO.Path]::GetPathRoot($TestDrive)).DriveFormat -eq 'NTFS') {
+            { New-Item -ItemType Junction -Path $junctionToDir -Value $realDir -ErrorAction Stop } | Should -Throw -ErrorId "NewItemInvalidOperation,Microsoft.PowerShell.Commands.NewItemCommand"
+            Test-Path $junctionToDir | Should -BeFalse
+        }
+
         It 'New-Item fails creating junction with relative path' -Skip:(!$IsWindows) {
             try {
                 Push-Location $TestDrive
